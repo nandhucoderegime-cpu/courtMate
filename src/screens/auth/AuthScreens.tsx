@@ -11,7 +11,7 @@ export function WelcomeScreen({ navigation }: { navigation: any }) {
   const { loginAs } = useAuth();
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.welcomeContainer, { paddingTop: insets.top + hp(3) }]}>
+    <ScrollView contentContainerStyle={[styles.welcomeContainer, { paddingTop: insets.top + hp(3) }]}>
       <View style={styles.brand}>
         <View style={styles.logoDot}>
           <Ionicons name="tennisball" size={normalize(30)} color="#fff" />
@@ -48,7 +48,7 @@ export function WelcomeScreen({ navigation }: { navigation: any }) {
         </TouchableOpacity>
       </View>
       <Text style={styles.switchNote}>You can switch between Player and Venue Owner mode anytime from Profile.</Text>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -186,7 +186,7 @@ const logoDotSize = wp(17);
 
 const styles = StyleSheet.create({
   welcomeContainer: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: COLORS.bg,
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.xl,
