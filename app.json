@@ -21,6 +21,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d5ddcd9d-4a2e-42f4-9117-e23a0978d631"
+      }
+    },
+    "owner": "nandhu-x31"
   }
 }

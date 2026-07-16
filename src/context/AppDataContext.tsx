@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { api } from '../services/api';
+import {
+  profileService,
+  chatService,
+  venueService,
+  slotService,
+  bookingService,
+  notificationService,
+  paymentService,
+} from '../services';
 import { Venue, PlayerProfile, Booking, ChatThread, ChatMessage, AppNotification, Slot } from '../types';
 import { venueSlots as seedSlots } from '../data/mockData';
 
@@ -33,17 +41,17 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [slotsByVenue, setSlotsByVenue] = useState<Record<string, Slot[]>>(seedSlots);
   const [loading, setLoading] = useState(true);
 
-  // Loads everything through services/api.ts on mount, exactly like it would
-  // with a real backend - only the inside of api.ts needs to change later.
+  // Loads data through domain-specific service modules on mount.
+  // Each service call is a direct swap target for a real API endpoint.
   useEffect(() => {
     (async () => {
       const [c, p, mb, vb, ch, n] = await Promise.all([
-        api.getCourts(),
-        api.getPlayers(),
-        api.getMyBookings(),
-        api.getVenueBookings(),
-        api.getChats(),
-        api.getNotifications(),
+        venueService.getVenues(),
+        profileService.getPlayers(),
+        bookingService.getPlayerBookings('me'),
+        bookingService.getVenueBookings(),
+        chatService.getThreads('me'),
+        notificationService.getNotifications('me'),
       ]);
       setCourts(c);
       setPlayers(p);
@@ -56,6 +64,15 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addBooking = (b: Booking) => {
+    // 1. Persist booking through booking service
+    bookingService.createBooking(b);
+
+    // 2. Dispatch booking alert via notification service
+    notificationService.sendBookingAlert(b).then(alert => {
+      setNotifications(prev => [alert, ...prev]);
+    });
+
+    // 3. Update local state
     setMyBookings(prev => [b, ...prev]);
     setSlotsByVenue(prev => ({
       ...prev,
@@ -66,35 +83,35 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   };
 
   const sendMessage = (chatId: string, text: string) => {
-    const msg: ChatMessage = { id: `m${Date.now()}`, senderId: 'me', text, time: 'Just now' };
+    const msg: ChatMessage = chatService.createMessage(chatId, 'me', text);
+    // Also fire the async service call for when backend is live
+    chatService.sendMessage(chatId, text);
     setChats(prev => prev.map(c => (c.id === chatId ? { ...c, messages: [...c.messages, msg] } : c)));
   };
 
   const startChat = (player: PlayerProfile): string => {
     const existing = chats.find(c => c.participant.id === player.id);
     if (existing) return existing.id;
-    const id = `ch${Date.now()}`;
-    const newChat: ChatThread = {
-      id,
-      participant: player,
-      messages: [
-        { id: `m${Date.now()}`, senderId: player.id, text: `Hi! Up for a ${player.sport.toLowerCase()} game sometime?`, time: 'Just now' },
-      ],
-    };
+    const newChat = chatService.createThread(player);
+    // Also fire the async service call for when backend is live
+    chatService.startThread(player);
     setChats(prev => [newChat, ...prev]);
-    return id;
+    return newChat.id;
   };
 
   const addVenue = (v: Venue) => {
+    venueService.createVenue(v);
     setCourts(prev => [v, ...prev]);
     setSlotsByVenue(prev => ({ ...prev, [v.id]: [] }));
   };
 
-  const updateVenue = (v: Venue) => {
+  const updateVenueData = (v: Venue) => {
+    venueService.updateVenue(v.id, v);
     setCourts(prev => prev.map(c => (c.id === v.id ? v : c)));
   };
 
-  const toggleSlot = (venueId: string, day: string, time: string) => {
+  const toggleSlotData = (venueId: string, day: string, time: string) => {
+    slotService.toggleSlot(venueId, day, time);
     setSlotsByVenue(prev => ({
       ...prev,
       [venueId]: (prev[venueId] || []).map(s =>
@@ -106,6 +123,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   };
 
   const markNotificationsRead = () => {
+    notificationService.markAllRead('me');
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
@@ -124,8 +142,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         sendMessage,
         startChat,
         addVenue,
-        updateVenue,
-        toggleSlot,
+        updateVenue: updateVenueData,
+        toggleSlot: toggleSlotData,
         markNotificationsRead,
       }}
     >

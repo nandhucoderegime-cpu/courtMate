@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { User, UserRole } from '../types';
+import { authService } from '../services';
 
 interface AuthContextValue {
   user: User | null;
@@ -11,35 +12,27 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-// MOCK AUTH: there's no backend yet, so this just creates a local session.
-// Swap this for a real login call (and store a token) once the Django API
-// is ready - the shape of `user` below is what the rest of the app expects.
-function makeUser(role: UserRole, name: string): User {
-  return {
-    id: 'me',
-    name,
-    email: `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-    role,
-    locality: 'Anna Nagar',
-    sport: 'Badminton',
-    skill: 'Intermediate',
-    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0E8E7C&color=fff`,
-  };
-}
+// AUTH: login/signup/switch calls are routed through services/gateway/authService.
+// When the Django API is ready, only the inside of authService needs to change.
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  const loginAs = (role: UserRole, name: string = role === 'player' ? 'You' : 'Venue Owner') => {
-    setUser(makeUser(role, name || (role === 'player' ? 'You' : 'Venue Owner')));
+  const loginAs = async (role: UserRole, name: string = role === 'player' ? 'You' : 'Venue Owner') => {
+    const email = `${(name || 'user').toLowerCase().replace(/\s+/g, '.')}@example.com`;
+    const loggedIn = await authService.login(email, 'mock', role);
+    setUser({ ...loggedIn, name: name || loggedIn.name });
   };
 
-  const logout = () => setUser(null);
+  const logout = async () => {
+    await authService.logout();
+    setUser(null);
+  };
 
   // This is the "same app, both roles" behaviour from the diagram: one
   // account, one session, and this just flips which tab bar / screens render.
   const switchRole = () => {
-    setUser(prev => (prev ? { ...prev, role: prev.role === 'player' ? 'venue_owner' : 'player' } : prev));
+    setUser(prev => (prev ? authService.switchRole(prev) : prev));
   };
 
   const updateProfile = (patch: Partial<User>) => {
