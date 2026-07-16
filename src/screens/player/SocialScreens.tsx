@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT, RADIUS } from '../../theme/theme';
 import { SPORTS } from '../../data/mockData';
@@ -7,9 +8,11 @@ import { useAppData } from '../../context/AppDataContext';
 import { PlayerCard } from '../../components/Cards';
 import { Chip, EmptyState } from '../../components/UI';
 import { PlayerProfile } from '../../types';
+import { s, hp, wp, normalize } from '../../utils/responsive';
 
 export function MatchingScreen({ navigation }: { navigation: any }) {
   const { players, startChat } = useAppData();
+  const insets = useSafeAreaInsets();
   const [sport, setSport] = useState<string | null>(null);
   const filtered = sport ? players.filter(p => p.sport === sport) : players;
 
@@ -20,7 +23,7 @@ export function MatchingScreen({ navigation }: { navigation: any }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + hp(1.5) }]}>
         <Text style={styles.title}>Find players</Text>
       </View>
       <FlatList
@@ -47,9 +50,10 @@ export function MatchingScreen({ navigation }: { navigation: any }) {
 
 export function ChatListScreen({ navigation }: { navigation: any }) {
   const { chats } = useAppData();
+  const insets = useSafeAreaInsets();
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + hp(1.5) }]}>
         <Text style={styles.title}>Chats</Text>
       </View>
       <FlatList
@@ -78,14 +82,15 @@ export function ChatListScreen({ navigation }: { navigation: any }) {
 export function ChatThreadScreen({ route }: { route: any }) {
   const { chatId } = route.params;
   const { chats, sendMessage } = useAppData();
+  const insets = useSafeAreaInsets();
   const [text, setText] = useState('');
   const chat = chats.find(c => c.id === chatId);
 
   if (!chat) return <EmptyState title="Conversation not found" />;
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: COLORS.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
-      <View style={styles.threadHeader}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: COLORS.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={s(90)}>
+      <View style={[styles.threadHeader, { paddingTop: insets.top + hp(1.5) }]}>
         <Image source={{ uri: chat.participant.avatar }} style={styles.chatAvatar} />
         <View style={{ marginLeft: SPACING.sm }}>
           <Text style={styles.chatName}>{chat.participant.name}</Text>
@@ -102,7 +107,7 @@ export function ChatThreadScreen({ route }: { route: any }) {
           </View>
         )}
       />
-      <View style={styles.inputRow}>
+      <View style={[styles.inputRow, { paddingBottom: Math.max(insets.bottom, s(8)) }]}>
         <TextInput
           style={styles.chatInput}
           value={text}
@@ -119,15 +124,18 @@ export function ChatThreadScreen({ route }: { route: any }) {
             }
           }}
         >
-          <Ionicons name="send" size={18} color="#fff" />
+          <Ionicons name="send" size={normalize(18)} color="#fff" />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
+const chatAvatarSize = wp(12.5);
+const sendBtnSize = s(42);
+
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: SPACING.lg, paddingTop: 60, paddingBottom: SPACING.sm },
+  header: { paddingHorizontal: SPACING.lg, paddingBottom: SPACING.sm },
   title: { ...FONT.h1, color: COLORS.ink },
   chatRow: {
     flexDirection: 'row',
@@ -139,22 +147,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.line,
   },
-  chatAvatar: { width: 48, height: 48, borderRadius: RADIUS.full, backgroundColor: COLORS.line },
+  chatAvatar: { width: chatAvatarSize, height: chatAvatarSize, borderRadius: RADIUS.full, backgroundColor: COLORS.line },
   chatName: { ...FONT.bodyMedium, color: COLORS.ink },
-  chatPreview: { ...FONT.small, color: COLORS.inkSoft, marginTop: 2 },
+  chatPreview: { ...FONT.small, color: COLORS.inkSoft, marginTop: s(2) },
   chatTime: { ...FONT.tiny, color: COLORS.inkFaint },
   threadHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: SPACING.lg,
-    paddingTop: 60,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.line,
     backgroundColor: COLORS.surface,
   },
-  bubble: { maxWidth: '78%', padding: 12, borderRadius: RADIUS.lg, marginBottom: SPACING.sm },
-  bubbleMe: { backgroundColor: COLORS.player, alignSelf: 'flex-end', borderBottomRightRadius: 4 },
-  bubbleThem: { backgroundColor: COLORS.surface, alignSelf: 'flex-start', borderWidth: 1, borderColor: COLORS.line, borderBottomLeftRadius: 4 },
+  bubble: { maxWidth: '78%', padding: s(12), borderRadius: RADIUS.lg, marginBottom: SPACING.sm },
+  bubbleMe: { backgroundColor: COLORS.player, alignSelf: 'flex-end', borderBottomRightRadius: s(4) },
+  bubbleThem: { backgroundColor: COLORS.surface, alignSelf: 'flex-start', borderWidth: 1, borderColor: COLORS.line, borderBottomLeftRadius: s(4) },
   bubbleText: { ...FONT.body, color: COLORS.ink },
   inputRow: { flexDirection: 'row', padding: SPACING.md, borderTopWidth: 1, borderTopColor: COLORS.line, backgroundColor: COLORS.surface, alignItems: 'center' },
   chatInput: {
@@ -162,11 +169,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.line,
     borderRadius: RADIUS.full,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: s(16),
+    paddingVertical: s(10),
     marginRight: SPACING.sm,
-    fontSize: 15,
+    fontSize: normalize(15),
     color: COLORS.ink,
   },
-  sendBtn: { width: 42, height: 42, borderRadius: RADIUS.full, backgroundColor: COLORS.player, alignItems: 'center', justifyContent: 'center' },
+  sendBtn: { width: sendBtnSize, height: sendBtnSize, borderRadius: RADIUS.full, backgroundColor: COLORS.player, alignItems: 'center', justifyContent: 'center' },
 });

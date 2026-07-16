@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
 import { COLORS, RADIUS, SPACING, FONT } from '../theme/theme';
+import { s, normalize } from '../utils/responsive';
 
 export function PrimaryButton({
   title,
@@ -97,19 +98,19 @@ export function EmptyState({ icon, title, body }: { icon?: React.ReactNode; titl
 }
 
 const styles = StyleSheet.create({
-  btn: { paddingVertical: 14, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
+  btn: { paddingVertical: s(14), borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
   btnText: { color: '#fff', ...FONT.bodyMedium },
-  btnOutline: { paddingVertical: 13, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
+  btnOutline: { paddingVertical: s(13), borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
   btnOutlineText: { ...FONT.bodyMedium },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.full, alignSelf: 'flex-start' },
+  badge: { paddingHorizontal: s(10), paddingVertical: s(4), borderRadius: RADIUS.full, alignSelf: 'flex-start' },
   badgeText: { ...FONT.tiny },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: s(14),
+    paddingVertical: s(8),
     borderRadius: RADIUS.full,
     borderWidth: 1,
     borderColor: COLORS.line,
-    marginRight: 8,
+    marginRight: s(8),
     backgroundColor: COLORS.surface,
   },
   chipText: { ...FONT.small, color: COLORS.ink },
@@ -125,5 +126,5 @@ const styles = StyleSheet.create({
   sectionAction: { ...FONT.small, color: COLORS.inkSoft },
   empty: { alignItems: 'center', justifyContent: 'center', padding: SPACING.xl },
   emptyTitle: { ...FONT.bodyMedium, color: COLORS.ink, marginTop: SPACING.sm, textAlign: 'center' },
-  emptyBody: { ...FONT.small, color: COLORS.inkSoft, marginTop: 4, textAlign: 'center' },
+  emptyBody: { ...FONT.small, color: COLORS.inkSoft, marginTop: s(4), textAlign: 'center' },
 });

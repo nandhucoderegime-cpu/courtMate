@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT, RADIUS, CURRENCY } from '../../theme/theme';
 import { SPORTS, DAYS } from '../../data/mockData';
@@ -7,15 +8,17 @@ import { useAppData } from '../../context/AppDataContext';
 import { CourtCard, BookingCard } from '../../components/Cards';
 import { Chip, PrimaryButton, EmptyState } from '../../components/UI';
 import { Booking } from '../../types';
+import { s, hp, wp, normalize } from '../../utils/responsive';
 
 export function CourtListScreen({ navigation }: { navigation: any }) {
   const { courts } = useAppData();
+  const insets = useSafeAreaInsets();
   const [sport, setSport] = useState<string | null>(null);
   const filtered = sport ? courts.filter(c => c.sport === sport) : courts;
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
-      <View style={styles.listHeader}>
+      <View style={[styles.listHeader, { paddingTop: insets.top + hp(1.5) }]}>
         <Text style={styles.title}>Courts</Text>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: SPACING.lg }}>
@@ -58,12 +61,12 @@ export function CourtDetailScreen({ route, navigation }: { route: any; navigatio
         <View style={styles.rowBetween}>
           <Text style={styles.title}>{venue.name}</Text>
           <View style={styles.ratingPill}>
-            <Ionicons name="star" size={13} color={COLORS.amber} />
+            <Ionicons name="star" size={normalize(13)} color={COLORS.amber} />
             <Text style={styles.ratingPillText}>{venue.rating}</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.addressRow} onPress={openMaps}>
-          <Ionicons name="location-outline" size={16} color={COLORS.inkSoft} />
+          <Ionicons name="location-outline" size={normalize(16)} color={COLORS.inkSoft} />
           <Text style={styles.addressText}>{venue.address}, {venue.locality} · {venue.distanceKm} km away</Text>
         </TouchableOpacity>
 
@@ -92,19 +95,19 @@ export function CourtDetailScreen({ route, navigation }: { route: any; navigatio
 
         <Text style={styles.sectionLabel}>Pick a time</Text>
         <View style={styles.slotGrid}>
-          {daySlots.map(s => (
+          {daySlots.map(sl => (
             <TouchableOpacity
-              key={s.time}
-              disabled={s.status !== 'available'}
-              onPress={() => setTime(s.time)}
+              key={sl.time}
+              disabled={sl.status !== 'available'}
+              onPress={() => setTime(sl.time)}
               style={[
                 styles.slotChip,
-                s.status !== 'available' && styles.slotDisabled,
-                time === s.time && styles.slotSelected,
+                sl.status !== 'available' && styles.slotDisabled,
+                time === sl.time && styles.slotSelected,
               ]}
             >
-              <Text style={[styles.slotText, s.status !== 'available' && styles.slotTextDim, time === s.time && styles.slotTextSelected]}>
-                {s.time}
+              <Text style={[styles.slotText, sl.status !== 'available' && styles.slotTextDim, time === sl.time && styles.slotTextSelected]}>
+                {sl.time}
               </Text>
             </TouchableOpacity>
           ))}
@@ -165,7 +168,7 @@ export function BookingConfirmScreen({ route, navigation }: { route: any; naviga
     return (
       <View style={styles.successContainer}>
         <View style={styles.successIcon}>
-          <Ionicons name="checkmark" size={36} color="#fff" />
+          <Ionicons name="checkmark" size={normalize(36)} color="#fff" />
         </View>
         <Text style={styles.title}>Booking confirmed!</Text>
         <Text style={styles.addressText}>{venue.name} · {day}, {time}</Text>
@@ -205,11 +208,12 @@ export function BookingConfirmScreen({ route, navigation }: { route: any; naviga
 
 export function MyBookingsScreen() {
   const { myBookings } = useAppData();
+  const insets = useSafeAreaInsets();
   const upcoming = myBookings.filter(b => b.status === 'upcoming');
   const past = myBookings.filter(b => b.status !== 'upcoming');
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: SPACING.lg, paddingTop: 60 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: SPACING.lg, paddingTop: insets.top + hp(1.5) }}>
       <Text style={styles.title}>My bookings</Text>
       <Text style={styles.sectionLabel}>Upcoming</Text>
       {upcoming.length === 0 && <EmptyState title="No upcoming bookings" body="Book a court to see it here." />}
@@ -220,23 +224,25 @@ export function MyBookingsScreen() {
   );
 }
 
+const successIconSize = wp(19);
+
 const styles = StyleSheet.create({
-  listHeader: { paddingHorizontal: SPACING.lg, paddingTop: 60, paddingBottom: SPACING.sm },
+  listHeader: { paddingHorizontal: SPACING.lg, paddingBottom: SPACING.sm },
   title: { ...FONT.h1, color: COLORS.ink },
   filterRow: { marginBottom: SPACING.sm, flexGrow: 0 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  heroImage: { width: '100%', height: 220, backgroundColor: COLORS.line },
-  ratingPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.amberTint, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.full },
-  ratingPillText: { ...FONT.small, marginLeft: 4, color: COLORS.ink },
-  addressRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
-  addressText: { ...FONT.small, color: COLORS.inkSoft, marginLeft: 4 },
-  amenityRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: SPACING.md, gap: 8 },
-  amenityChip: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.full, paddingHorizontal: 12, paddingVertical: 6 },
+  heroImage: { width: '100%', height: hp(27), backgroundColor: COLORS.line },
+  ratingPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.amberTint, paddingHorizontal: s(10), paddingVertical: s(5), borderRadius: RADIUS.full },
+  ratingPillText: { ...FONT.small, marginLeft: s(4), color: COLORS.ink },
+  addressRow: { flexDirection: 'row', alignItems: 'center', marginTop: s(8) },
+  addressText: { ...FONT.small, color: COLORS.inkSoft, marginLeft: s(4) },
+  amenityRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: SPACING.md, gap: s(8) },
+  amenityChip: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.full, paddingHorizontal: s(12), paddingVertical: s(6) },
   amenityText: { ...FONT.tiny, color: COLORS.ink },
   sectionLabel: { ...FONT.bodyMedium, color: COLORS.ink, marginTop: SPACING.lg, marginBottom: SPACING.sm },
   sectionLabelInline: { ...FONT.bodyMedium, color: COLORS.ink },
-  slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  slotChip: { borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.md, paddingVertical: 10, paddingHorizontal: 12, backgroundColor: COLORS.surface },
+  slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: s(8) },
+  slotChip: { borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.md, paddingVertical: s(10), paddingHorizontal: s(12), backgroundColor: COLORS.surface },
   slotDisabled: { backgroundColor: '#F1F1EE', borderColor: '#F1F1EE' },
   slotSelected: { backgroundColor: COLORS.player, borderColor: COLORS.player },
   slotText: { ...FONT.small, color: COLORS.ink },
@@ -244,9 +250,9 @@ const styles = StyleSheet.create({
   slotTextSelected: { color: '#fff' },
   priceValue: { ...FONT.h3, color: COLORS.ink },
   successContainer: { flex: 1, backgroundColor: COLORS.bg, alignItems: 'center', justifyContent: 'center', padding: SPACING.xl },
-  successIcon: { width: 72, height: 72, borderRadius: 36, backgroundColor: COLORS.success, alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.lg },
-  summaryCard: { backgroundColor: COLORS.surface, borderRadius: RADIUS.lg, padding: SPACING.lg, marginTop: SPACING.lg, borderWidth: 1, borderColor: COLORS.line, gap: 8 },
+  successIcon: { width: successIconSize, height: successIconSize, borderRadius: successIconSize / 2, backgroundColor: COLORS.success, alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.lg },
+  summaryCard: { backgroundColor: COLORS.surface, borderRadius: RADIUS.lg, padding: SPACING.lg, marginTop: SPACING.lg, borderWidth: 1, borderColor: COLORS.line, gap: s(8) },
   summaryVenue: { ...FONT.h3, color: COLORS.ink },
-  divider: { height: 1, backgroundColor: COLORS.line, marginVertical: 6 },
+  divider: { height: 1, backgroundColor: COLORS.line, marginVertical: s(6) },
   mockNote: { ...FONT.tiny, color: COLORS.inkFaint, marginTop: SPACING.md },
 });

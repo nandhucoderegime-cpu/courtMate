@@ -7,6 +7,7 @@ import PlayerHomeScreen from '../screens/player/PlayerHomeScreen';
 import { CourtListScreen, CourtDetailScreen, BookingConfirmScreen, MyBookingsScreen } from '../screens/player/CourtScreens';
 import { MatchingScreen, ChatListScreen, ChatThreadScreen } from '../screens/player/SocialScreens';
 import { NotificationsScreen, SettingsScreen, ProfileScreen } from '../screens/shared/SharedScreens';
+import { hp, normalize, s } from '../utils/responsive';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -26,8 +27,9 @@ function PlayerTabs() {
         headerShown: false,
         tabBarActiveTintColor: COLORS.player,
         tabBarInactiveTintColor: COLORS.inkFaint,
-        tabBarStyle: { borderTopColor: COLORS.line, height: 60, paddingBottom: 8, paddingTop: 8 },
-        tabBarIcon: ({ color, size }) => <Ionicons name={TAB_ICON[route.name]} size={size - 2} color={color} />,
+        tabBarStyle: { borderTopColor: COLORS.line, height: hp(7.5), minHeight: 60, paddingBottom: hp(1), paddingTop: hp(1) },
+        tabBarIcon: ({ color, size }) => <Ionicons name={TAB_ICON[route.name]} size={normalize(size - 2)} color={color} />,
+        tabBarLabelStyle: { fontSize: normalize(10), marginBottom: s(2) }
       })}
     >
       <Tab.Screen name="Home" component={PlayerHomeScreen} />

@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, RADIUS, SPACING, FONT } from '../../theme/theme';
 import { PrimaryButton, SecondaryButton } from '../../components/UI';
 import { useAuth } from '../../context/AuthContext';
+import { s, hp, wp, normalize } from '../../utils/responsive';
 
 export function WelcomeScreen({ navigation }: { navigation: any }) {
   const { loginAs } = useAuth();
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.welcomeContainer}>
+    <View style={[styles.welcomeContainer, { paddingTop: insets.top + hp(3) }]}>
       <View style={styles.brand}>
         <View style={styles.logoDot}>
-          <Ionicons name="tennisball" size={30} color="#fff" />
+          <Ionicons name="tennisball" size={normalize(30)} color="#fff" />
         </View>
         <Text style={styles.brandName}>CourtMate</Text>
         <Text style={styles.brandTag}>Find a court. Find a player. Play today.</Text>
@@ -22,7 +25,7 @@ export function WelcomeScreen({ navigation }: { navigation: any }) {
           style={[styles.roleCard, { backgroundColor: COLORS.playerTint, borderColor: COLORS.player }]}
           onPress={() => loginAs('player')}
         >
-          <Ionicons name="people" size={26} color={COLORS.playerDark} />
+          <Ionicons name="people" size={normalize(26)} color={COLORS.playerDark} />
           <Text style={[styles.roleTitle, { color: COLORS.playerDark }]}>I'm a Player</Text>
           <Text style={styles.roleBody}>Book courts and find people to play with</Text>
         </TouchableOpacity>
@@ -30,7 +33,7 @@ export function WelcomeScreen({ navigation }: { navigation: any }) {
           style={[styles.roleCard, { backgroundColor: COLORS.venueTint, borderColor: COLORS.venue }]}
           onPress={() => loginAs('venue_owner')}
         >
-          <Ionicons name="business" size={26} color={COLORS.venueDark} />
+          <Ionicons name="business" size={normalize(26)} color={COLORS.venueDark} />
           <Text style={[styles.roleTitle, { color: COLORS.venueDark }]}>I'm a Venue Owner</Text>
           <Text style={styles.roleBody}>List courts and manage bookings</Text>
         </TouchableOpacity>
@@ -51,6 +54,7 @@ export function WelcomeScreen({ navigation }: { navigation: any }) {
 
 export function LoginScreen({ navigation }: { navigation: any }) {
   const { loginAs } = useAuth();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'player' | 'venue_owner'>('player');
@@ -58,7 +62,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: COLORS.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.formContainer}>
+      <ScrollView contentContainerStyle={[styles.formContainer, { paddingTop: insets.top + hp(2) }]}>
         <Text style={styles.formTitle}>Log in</Text>
         <Text style={styles.formSub}>No backend is connected yet - any valid-looking details will sign you in.</Text>
 
@@ -113,6 +117,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
 
 export function SignupScreen({ navigation }: { navigation: any }) {
   const { loginAs } = useAuth();
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -121,7 +126,7 @@ export function SignupScreen({ navigation }: { navigation: any }) {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: COLORS.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.formContainer}>
+      <ScrollView contentContainerStyle={[styles.formContainer, { paddingTop: insets.top + hp(2) }]}>
         <Text style={styles.formTitle}>Create account</Text>
         <Text style={styles.formSub}>This creates a local mock session - wire it up to your API in services/api.ts later.</Text>
 
@@ -177,40 +182,41 @@ export function SignupScreen({ navigation }: { navigation: any }) {
   );
 }
 
+const logoDotSize = wp(17);
+
 const styles = StyleSheet.create({
   welcomeContainer: {
     flex: 1,
     backgroundColor: COLORS.bg,
     paddingHorizontal: SPACING.lg,
-    paddingTop: 90,
     paddingBottom: SPACING.xl,
     justifyContent: 'space-between',
   },
   brand: { alignItems: 'center' },
-  logoDot: { width: 64, height: 64, borderRadius: 20, backgroundColor: COLORS.player, alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.md },
+  logoDot: { width: logoDotSize, height: logoDotSize, borderRadius: s(20), backgroundColor: COLORS.player, alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.md },
   brandName: { ...FONT.h1, color: COLORS.ink },
-  brandTag: { ...FONT.body, color: COLORS.inkSoft, marginTop: 6, textAlign: 'center' },
+  brandTag: { ...FONT.body, color: COLORS.inkSoft, marginTop: s(6), textAlign: 'center' },
   roleCards: { gap: SPACING.md },
   roleCard: { borderWidth: 1.5, borderRadius: RADIUS.lg, padding: SPACING.lg },
   roleTitle: { ...FONT.h3, marginTop: SPACING.sm },
-  roleBody: { ...FONT.small, color: COLORS.inkSoft, marginTop: 4 },
+  roleBody: { ...FONT.small, color: COLORS.inkSoft, marginTop: s(4) },
   authLinks: { alignItems: 'center', gap: SPACING.sm },
   linkText: { ...FONT.bodyMedium, color: COLORS.ink, textDecorationLine: 'underline' },
   switchNote: { ...FONT.tiny, color: COLORS.inkFaint, textAlign: 'center', marginTop: SPACING.sm },
-  formContainer: { padding: SPACING.lg, paddingTop: 70 },
-  formTitle: { ...FONT.h1, color: COLORS.ink, marginBottom: 6 },
+  formContainer: { padding: SPACING.lg },
+  formTitle: { ...FONT.h1, color: COLORS.ink, marginBottom: s(6) },
   formSub: { ...FONT.small, color: COLORS.inkSoft, marginBottom: SPACING.lg },
-  label: { ...FONT.small, color: COLORS.inkSoft, marginBottom: 6, marginTop: SPACING.sm },
+  label: { ...FONT.small, color: COLORS.inkSoft, marginBottom: s(6), marginTop: SPACING.sm },
   input: {
     borderWidth: 1,
     borderColor: COLORS.line,
     borderRadius: RADIUS.md,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: s(14),
+    paddingVertical: s(12),
     backgroundColor: COLORS.surface,
-    fontSize: 15,
+    fontSize: normalize(15),
     color: COLORS.ink,
   },
-  roleToggle: { flex: 1, borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.md, paddingVertical: 10, alignItems: 'center', marginRight: 8 },
+  roleToggle: { flex: 1, borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.md, paddingVertical: s(10), alignItems: 'center', marginRight: s(8) },
   roleToggleText: { ...FONT.bodyMedium, color: COLORS.ink },
 });

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, Image, Switch, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT, RADIUS } from '../../theme/theme';
 import { useAuth } from '../../context/AuthContext';
 import { useAppData } from '../../context/AppDataContext';
 import { EmptyState, Badge } from '../../components/UI';
+import { s, hp, wp, normalize } from '../../utils/responsive';
 
 const NOTIF_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   booking: 'calendar',
@@ -14,6 +16,7 @@ const NOTIF_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 export function NotificationsScreen() {
   const { notifications, markNotificationsRead } = useAppData();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     markNotificationsRead();
@@ -22,7 +25,7 @@ export function NotificationsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + hp(1.5) }]}>
         <Text style={styles.title}>Notifications</Text>
       </View>
       <FlatList
@@ -33,7 +36,7 @@ export function NotificationsScreen() {
         renderItem={({ item }) => (
           <View style={styles.notifRow}>
             <View style={styles.notifIcon}>
-              <Ionicons name={NOTIF_ICON[item.type]} size={18} color={COLORS.player} />
+              <Ionicons name={NOTIF_ICON[item.type]} size={normalize(18)} color={COLORS.player} />
             </View>
             <View style={{ flex: 1, marginLeft: SPACING.md }}>
               <Text style={styles.notifTitle}>{item.title}</Text>
@@ -49,11 +52,12 @@ export function NotificationsScreen() {
 
 export function SettingsScreen() {
   const { logout } = useAuth();
+  const insets = useSafeAreaInsets();
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: SPACING.lg, paddingTop: 60 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: SPACING.lg, paddingTop: insets.top + hp(1.5) }}>
       <Text style={styles.title}>Settings</Text>
 
       <Text style={styles.settingsGroup}>Notifications</Text>
@@ -89,13 +93,14 @@ export function SettingsScreen() {
 
 export function ProfileScreen({ navigation }: { navigation: any }) {
   const { user, switchRole } = useAuth();
+  const insets = useSafeAreaInsets();
   const isPlayer = user?.role === 'player';
   const accent = isPlayer ? COLORS.player : COLORS.venue;
   const accentTint = isPlayer ? COLORS.playerTint : COLORS.venueTint;
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ paddingBottom: SPACING.xl }}>
-      <View style={[styles.profileHeader, { backgroundColor: accentTint }]}>
+      <View style={[styles.profileHeader, { backgroundColor: accentTint, paddingTop: insets.top + hp(2) }]}>
         <Image source={{ uri: user?.avatar }} style={styles.profileAvatar} />
         <Text style={styles.profileName}>{user?.name}</Text>
         <Badge label={isPlayer ? 'Player' : 'Venue Owner'} color={accent} tint={COLORS.surface} />
@@ -125,21 +130,24 @@ function MenuItem({
 }) {
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-      <Ionicons name={icon} size={20} color={highlight ? COLORS.player : COLORS.ink} />
+      <Ionicons name={icon} size={normalize(20)} color={highlight ? COLORS.player : COLORS.ink} />
       <Text style={[styles.menuLabel, highlight && { color: COLORS.player, fontWeight: '700' }]}>{label}</Text>
-      <Ionicons name="chevron-forward" size={18} color={COLORS.inkFaint} />
+      <Ionicons name="chevron-forward" size={normalize(18)} color={COLORS.inkFaint} />
     </TouchableOpacity>
   );
 }
 
+const notifIconSize = s(36);
+const avatarSize = wp(22.5); // ~84px on 375 base
+
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: SPACING.lg, paddingTop: 60, paddingBottom: SPACING.sm },
+  header: { paddingHorizontal: SPACING.lg, paddingBottom: SPACING.sm },
   title: { ...FONT.h1, color: COLORS.ink },
   notifRow: { flexDirection: 'row', backgroundColor: COLORS.surface, borderRadius: RADIUS.lg, padding: SPACING.md, marginBottom: SPACING.md, borderWidth: 1, borderColor: COLORS.line },
-  notifIcon: { width: 36, height: 36, borderRadius: RADIUS.full, backgroundColor: COLORS.playerTint, alignItems: 'center', justifyContent: 'center' },
+  notifIcon: { width: notifIconSize, height: notifIconSize, borderRadius: RADIUS.full, backgroundColor: COLORS.playerTint, alignItems: 'center', justifyContent: 'center' },
   notifTitle: { ...FONT.bodyMedium, color: COLORS.ink },
-  notifBody: { ...FONT.small, color: COLORS.inkSoft, marginTop: 2 },
-  notifTime: { ...FONT.tiny, color: COLORS.inkFaint, marginTop: 4 },
+  notifBody: { ...FONT.small, color: COLORS.inkSoft, marginTop: s(2) },
+  notifTime: { ...FONT.tiny, color: COLORS.inkFaint, marginTop: s(4) },
   settingsGroup: { ...FONT.small, color: COLORS.inkSoft, marginTop: SPACING.lg, marginBottom: SPACING.sm, textTransform: 'uppercase' },
   settingRow: {
     flexDirection: 'row',
@@ -156,8 +164,8 @@ const styles = StyleSheet.create({
   settingValue: { ...FONT.small, color: COLORS.inkSoft },
   logoutBtn: { marginTop: SPACING.xl, alignItems: 'center', padding: SPACING.md },
   logoutText: { ...FONT.bodyMedium, color: COLORS.danger },
-  profileHeader: { alignItems: 'center', paddingTop: 70, paddingBottom: SPACING.xl, gap: 8 },
-  profileAvatar: { width: 84, height: 84, borderRadius: 42, backgroundColor: COLORS.surface, marginBottom: 4 },
+  profileHeader: { alignItems: 'center', paddingBottom: SPACING.xl, gap: s(8) },
+  profileAvatar: { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2, backgroundColor: COLORS.surface, marginBottom: s(4) },
   profileName: { ...FONT.h2, color: COLORS.ink },
   profileMeta: { ...FONT.small, color: COLORS.inkSoft },
   menuList: { padding: SPACING.lg },

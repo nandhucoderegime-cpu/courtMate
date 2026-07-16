@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT, RADIUS, CURRENCY } from '../../theme/theme';
 import { SPORTS, DAYS, AMENITIES } from '../../data/mockData';
@@ -7,17 +8,19 @@ import { useAppData } from '../../context/AppDataContext';
 import { CourtCard, BookingCard } from '../../components/Cards';
 import { Chip, PrimaryButton, EmptyState } from '../../components/UI';
 import { Venue } from '../../types';
+import { s, hp, wp, normalize } from '../../utils/responsive';
 
 export function MyVenuesScreen({ navigation }: { navigation: any }) {
   const { courts } = useAppData();
+  const insets = useSafeAreaInsets();
   const myVenues = courts.filter(c => c.ownerId === 'owner1');
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
-      <View style={styles.headerRow}>
+      <View style={[styles.headerRow, { paddingTop: insets.top + hp(1.5) }]}>
         <Text style={styles.title}>My venues</Text>
         <TouchableOpacity style={styles.addBtn} onPress={() => navigation.navigate('VenueForm', {})}>
-          <Ionicons name="add" size={22} color="#fff" />
+          <Ionicons name="add" size={normalize(22)} color="#fff" />
         </TouchableOpacity>
       </View>
       <FlatList
@@ -34,6 +37,7 @@ export function MyVenuesScreen({ navigation }: { navigation: any }) {
 export function VenueFormScreen({ route, navigation }: { route: any; navigation: any }) {
   const { venueId } = route.params || {};
   const { courts, addVenue, updateVenue } = useAppData();
+  const insets = useSafeAreaInsets();
   const existing = courts.find(c => c.id === venueId);
 
   const [name, setName] = useState(existing?.name || '');
@@ -70,7 +74,7 @@ export function VenueFormScreen({ route, navigation }: { route: any; navigation:
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: COLORS.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={{ padding: SPACING.lg, paddingTop: 60 }}>
+      <ScrollView contentContainerStyle={{ padding: SPACING.lg, paddingTop: insets.top + hp(2) }}>
         <Text style={styles.title}>{existing ? 'Edit venue' : 'Add a venue'}</Text>
 
         <Text style={styles.label}>Venue name</Text>
@@ -78,8 +82,8 @@ export function VenueFormScreen({ route, navigation }: { route: any; navigation:
 
         <Text style={styles.label}>Sport</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: SPACING.sm }}>
-          {SPORTS.map(s => (
-            <Chip key={s} label={s} active={sport === s} onPress={() => setSport(s)} color={COLORS.venue} />
+          {SPORTS.map(sp => (
+            <Chip key={sp} label={sp} active={sport === sp} onPress={() => setSport(sp)} color={COLORS.venue} />
           ))}
         </ScrollView>
 
@@ -109,6 +113,7 @@ export function VenueFormScreen({ route, navigation }: { route: any; navigation:
 
 export function SlotCalendarScreen() {
   const { courts, slotsByVenue, toggleSlot } = useAppData();
+  const insets = useSafeAreaInsets();
   const myVenues = courts.filter(c => c.ownerId === 'owner1');
   const [venueId, setVenueId] = useState(myVenues[0]?.id);
   const slots = slotsByVenue[venueId || ''] || [];
@@ -118,7 +123,7 @@ export function SlotCalendarScreen() {
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: SPACING.lg, paddingTop: 60, paddingBottom: SPACING.xl }}>
+    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: SPACING.lg, paddingTop: insets.top + hp(1.5), paddingBottom: SPACING.xl }}>
       <Text style={styles.title}>Slot calendar</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: SPACING.md }}>
         {myVenues.map(v => (
@@ -131,15 +136,15 @@ export function SlotCalendarScreen() {
           <Text style={styles.dayLabel}>{day}</Text>
           <View style={styles.slotGrid}>
             {slots
-              .filter(s => s.day === day)
-              .map(s => (
+              .filter(sl => sl.day === day)
+              .map(sl => (
                 <TouchableOpacity
-                  key={s.time}
-                  onPress={() => venueId && toggleSlot(venueId, s.day, s.time)}
-                  disabled={s.status === 'booked'}
-                  style={[styles.slotChip, s.status === 'booked' && styles.slotBooked, s.status === 'blocked' && styles.slotBlockedOwner]}
+                  key={sl.time}
+                  onPress={() => venueId && toggleSlot(venueId, sl.day, sl.time)}
+                  disabled={sl.status === 'booked'}
+                  style={[styles.slotChip, sl.status === 'booked' && styles.slotBooked, sl.status === 'blocked' && styles.slotBlockedOwner]}
                 >
-                  <Text style={[styles.slotText, s.status === 'booked' && styles.slotTextDim]}>{s.time}</Text>
+                  <Text style={[styles.slotText, sl.status === 'booked' && styles.slotTextDim]}>{sl.time}</Text>
                 </TouchableOpacity>
               ))}
           </View>
@@ -157,7 +162,7 @@ export function SlotCalendarScreen() {
 function LegendDot({ color, label, border }: { color: string; label: string; border?: boolean }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: SPACING.md }}>
-      <View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: color, borderWidth: border ? 1 : 0, borderColor: COLORS.line, marginRight: 6 }} />
+      <View style={{ width: s(12), height: s(12), borderRadius: s(3), backgroundColor: color, borderWidth: border ? 1 : 0, borderColor: COLORS.line, marginRight: s(6) }} />
       <Text style={styles.legendText}>{label}</Text>
     </View>
   );
@@ -165,8 +170,9 @@ function LegendDot({ color, label, border }: { color: string; label: string; bor
 
 export function VenueBookingsScreen() {
   const { venueBookings } = useAppData();
+  const insets = useSafeAreaInsets();
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: SPACING.lg, paddingTop: 60 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: SPACING.lg, paddingTop: insets.top + hp(1.5) }}>
       <Text style={styles.title}>Bookings</Text>
       {venueBookings.length === 0 && <EmptyState title="No bookings yet" />}
       {venueBookings.map(b => <BookingCard key={b.id} booking={b} />)}
@@ -174,29 +180,31 @@ export function VenueBookingsScreen() {
   );
 }
 
+const addBtnSize = s(40);
+
 const styles = StyleSheet.create({
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: SPACING.lg, paddingTop: 60, paddingBottom: SPACING.sm },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: SPACING.lg, paddingBottom: SPACING.sm },
   title: { ...FONT.h1, color: COLORS.ink },
-  addBtn: { width: 40, height: 40, borderRadius: RADIUS.full, backgroundColor: COLORS.venue, alignItems: 'center', justifyContent: 'center' },
-  label: { ...FONT.small, color: COLORS.inkSoft, marginBottom: 6, marginTop: SPACING.sm },
+  addBtn: { width: addBtnSize, height: addBtnSize, borderRadius: RADIUS.full, backgroundColor: COLORS.venue, alignItems: 'center', justifyContent: 'center' },
+  label: { ...FONT.small, color: COLORS.inkSoft, marginBottom: s(6), marginTop: SPACING.sm },
   input: {
     borderWidth: 1,
     borderColor: COLORS.line,
     borderRadius: RADIUS.md,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: s(14),
+    paddingVertical: s(12),
     backgroundColor: COLORS.surface,
-    fontSize: 15,
+    fontSize: normalize(15),
     color: COLORS.ink,
   },
-  amenityWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  amenityToggle: { borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.full, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: COLORS.surface },
+  amenityWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: s(8) },
+  amenityToggle: { borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.full, paddingHorizontal: s(12), paddingVertical: s(8), backgroundColor: COLORS.surface },
   amenityToggleActive: { backgroundColor: COLORS.venue, borderColor: COLORS.venue },
   amenityToggleText: { ...FONT.small, color: COLORS.ink },
   mockNote: { ...FONT.tiny, color: COLORS.inkFaint, marginBottom: SPACING.md },
-  dayLabel: { ...FONT.bodyMedium, color: COLORS.ink, marginBottom: 8 },
-  slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  slotChip: { borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.md, paddingVertical: 10, paddingHorizontal: 12, backgroundColor: COLORS.surface },
+  dayLabel: { ...FONT.bodyMedium, color: COLORS.ink, marginBottom: s(8) },
+  slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: s(8) },
+  slotChip: { borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.md, paddingVertical: s(10), paddingHorizontal: s(12), backgroundColor: COLORS.surface },
   slotBooked: { backgroundColor: '#F1F1EE', borderColor: '#F1F1EE' },
   slotBlockedOwner: { backgroundColor: COLORS.venueTint, borderColor: COLORS.venue },
   slotText: { ...FONT.small, color: COLORS.ink },

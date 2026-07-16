@@ -1,4 +1,5 @@
 import { UserRole } from '../types';
+import { normalize, s } from '../utils/responsive';
 
 // Palette is grounded in the architecture diagram itself: teal marked "Player
 // services", coral marked "Venue services". We reuse that language as the
@@ -29,17 +30,31 @@ export const COLORS = {
   white: '#FFFFFF',
 };
 
-export const SPACING = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 40 };
-export const RADIUS = { sm: 8, md: 14, lg: 20, xl: 28, full: 999 };
+export const SPACING = {
+  xs: s(4),
+  sm: s(8),
+  md: s(16),
+  lg: s(24),
+  xl: s(32),
+  xxl: s(40),
+};
+
+export const RADIUS = {
+  sm: s(8),
+  md: s(14),
+  lg: s(20),
+  xl: s(28),
+  full: 999,
+};
 
 export const FONT = {
-  h1: { fontSize: 28, fontWeight: '800' as const, letterSpacing: -0.5 },
-  h2: { fontSize: 22, fontWeight: '700' as const, letterSpacing: -0.3 },
-  h3: { fontSize: 17, fontWeight: '700' as const },
-  body: { fontSize: 15, fontWeight: '400' as const },
-  bodyMedium: { fontSize: 15, fontWeight: '600' as const },
-  small: { fontSize: 13, fontWeight: '400' as const },
-  tiny: { fontSize: 11, fontWeight: '600' as const },
+  h1: { fontSize: normalize(28), fontWeight: '800' as const, letterSpacing: -0.5 },
+  h2: { fontSize: normalize(22), fontWeight: '700' as const, letterSpacing: -0.3 },
+  h3: { fontSize: normalize(17), fontWeight: '700' as const },
+  body: { fontSize: normalize(15), fontWeight: '400' as const },
+  bodyMedium: { fontSize: normalize(15), fontWeight: '600' as const },
+  small: { fontSize: normalize(13), fontWeight: '400' as const },
+  tiny: { fontSize: normalize(11), fontWeight: '600' as const },
 };
 
 export const CURRENCY = '₹';
