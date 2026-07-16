@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: s(10), paddingVertical: s(4), borderRadius: RADIUS.full, alignSelf: 'flex-start' },
   badgeText: { ...FONT.tiny },
   chip: {
+    flexDirection: 'row',
     paddingHorizontal: s(14),
     paddingVertical: s(8),
     borderRadius: RADIUS.full,
@@ -112,8 +113,10 @@ const styles = StyleSheet.create({
     borderColor: COLORS.line,
     marginRight: s(8),
     backgroundColor: COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  chipText: { ...FONT.small, color: COLORS.ink },
+  chipText: { ...FONT.small, color: COLORS.ink, includeFontPadding: false, textAlignVertical: 'center' },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

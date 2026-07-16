@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../theme/theme';
 import VenueDashboardScreen from '../screens/venue/VenueDashboardScreen';
@@ -20,13 +21,15 @@ const TAB_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 function VenueTabs() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: COLORS.venue,
         tabBarInactiveTintColor: COLORS.inkFaint,
-        tabBarStyle: { borderTopColor: COLORS.line, height: hp(7.5), minHeight: 60, paddingBottom: hp(1), paddingTop: hp(1) },
+        tabBarStyle: { borderTopColor: COLORS.line, height: hp(7.5) + insets.bottom, minHeight: 60 + insets.bottom, paddingBottom: hp(1) + insets.bottom, paddingTop: hp(1) },
         tabBarIcon: ({ color, size }) => <Ionicons name={TAB_ICON[route.name]} size={normalize(size - 2)} color={color} />,
         tabBarLabelStyle: { fontSize: normalize(10), marginBottom: s(2) }
       })}

@@ -21,7 +21,7 @@ export function CourtListScreen({ navigation }: { navigation: any }) {
       <View style={[styles.listHeader, { paddingTop: insets.top + hp(1.5) }]}>
         <Text style={styles.title}>Courts</Text>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: SPACING.lg }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: SPACING.lg, alignItems: 'center' }}>
         <Chip label="All" active={!sport} onPress={() => setSport(null)} />
         {SPORTS.map(s => (
           <Chip key={s} label={s} active={sport === s} onPress={() => setSport(s)} />
